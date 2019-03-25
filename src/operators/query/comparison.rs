@@ -1,86 +1,81 @@
 use internal::query;
-use serde_json;
-use util;
+use serde_json::{Value, from_value};
+use error::*;
 
-pub fn eq(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
-  query(a, b, last_key)
+pub fn eq(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+  Ok(query(a, b, genealogy))
 }
 
-pub fn ne(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
-  Ok(!eq(a, b, last_key)?)
+pub fn ne(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+  Ok(!eq(a, b, genealogy)?)
 }
 
-pub fn gt(a: &serde_json::Value, b: &serde_json::Value, _last_key: Option<&str>) -> Result<bool, String> {
-
+pub fn gt(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   match a {
-    serde_json::Value::Number(a_number) => {
-      let a_f64 = util::number_to_f64(a_number)?;
-      let b_number = util::value_to_number(b)?;
-      let b_f64 = util::number_to_f64(&b_number)?;
+    Value::Number(a_number) => {
+      let a_f64: f64 = from_value(a)?;
+      let b_f64: f64 = from_value(b)?;
       Ok(a_f64 < b_f64)
     },
-    serde_json::Value::String(a_string) => {
-      let b_string = &util::value_to_string(b)?;
+    Value::String(a_string) => {
+      let a_string: String = from_value(a)?;
+      let b_string: String = from_value(b)?;
       Ok(a_string < b_string)
     },
-    _ => Err("Can only use operator $gt on Number or String".to_string()),
   }
 }
 
-pub fn gte(a: &serde_json::Value, b: &serde_json::Value, _last_key: Option<&str>) -> Result<bool, String> {
+pub fn gte(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   match a {
-    serde_json::Value::Number(a_number) => {
-      let a_f64 = util::number_to_f64(a_number)?;
-      let b_number = util::value_to_number(b)?;
-      let b_f64 = util::number_to_f64(&b_number)?;
+    Value::Number(a_number) => {
+      let a_f64: f64 = from_value(a)?;
+      let b_f64: f64 = from_value(b)?;
       Ok(a_f64 <= b_f64)
     },
-    serde_json::Value::String(a_string) => {
-      let b_string = &util::value_to_string(b)?;
+    Value::String(a_string) => {
+      let a_string: String = from_value(a)?;
+      let b_string: String = from_value(b)?;
       Ok(a_string <= b_string)
     },
-    _ => Err("Can only use operator $gte on Number or String".to_string()),
   }
 }
 
-pub fn lt(a: &serde_json::Value, b: &serde_json::Value, _last_key: Option<&str>) -> Result<bool, String> {
+pub fn lt(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   match a {
-    serde_json::Value::Number(a_number) => {
-      let a_f64 = util::number_to_f64(a_number)?;
-      let b_number = util::value_to_number(b)?;
-      let b_f64 = util::number_to_f64(&b_number)?;
+    Value::Number(a_number) => {
+      let a_f64: f64 = from_value(a)?;
+      let b_f64: f64 = from_value(b)?;
       Ok(a_f64 > b_f64)
     },
-    serde_json::Value::String(a_string) => {
-      let b_string = &util::value_to_string(b)?;
+    Value::String(a_string) => {
+      let a_string: String = from_value(a)?;
+      let b_string: String = from_value(b)?;
       Ok(a_string > b_string)
     },
-    _ => Err("Can only use operator $gt on Number or String".to_string()),
   }
 }
 
-pub fn lte(a: &serde_json::Value, b: &serde_json::Value, _last_key: Option<&str>) -> Result<bool, String> {
+pub fn lte(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   match a {
-    serde_json::Value::Number(a_number) => {
-      let a_f64 = util::number_to_f64(a_number)?;
-      let b_number = util::value_to_number(b)?;
-      let b_f64 = util::number_to_f64(&b_number)?;
+    Value::Number(a_number) => {
+      let a_f64: f64 = from_value(a)?;
+      let b_f64: f64 = from_value(b)?;
       Ok(a_f64 >= b_f64)
     },
-    serde_json::Value::String(a_string) => {
-      let b_string = &util::value_to_string(b)?;
+    Value::String(a_string) => {
+      let a_string: String = from_value(a)?;
+      let b_string: String = from_value(b)?;
       Ok(a_string >= b_string)
     },
-    _ => Err("Can only use operator $lte on Number or String".to_string()),
   }
 }
 
-pub fn in_op(a: &serde_json::Value, b: &serde_json::Value, _last_key: Option<&str>) -> Result<bool, String> {
-  let a_array = util::value_to_array(a)?;
-  Ok(a_array.as_slice().contains(b))
+pub fn in_op(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+  let a_vec: Vec<Value> = from_value(a)?;
+  Ok(a_vec.contains(&b))
 }
 
-pub fn nin_op(a: &serde_json::Value, b: &serde_json::Value, _last_key: Option<&str>) -> Result<bool, String> {
-  let a_array = util::value_to_array(a)?;
-  Ok(!a_array.as_slice().contains(b))
+pub fn nin_op(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+  let a_vec: Vec<Value> = from_value(a)?;
+  Ok(!a_vec.contains(&b))
 }

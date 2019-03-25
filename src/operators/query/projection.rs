@@ -1,17 +1,18 @@
-use serde_json;
+use serde_json::{Value};
+use error::*;
 
-pub fn projection(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
+pub fn projection(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn elem_match(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
+pub fn elem_match(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn meta(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
+pub fn meta(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn slice(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
+pub fn slice(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   unimplemented!()
 }

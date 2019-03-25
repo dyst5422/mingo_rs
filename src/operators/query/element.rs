@@ -1,102 +1,57 @@
-use serde_json;
+use serde_json::{Value, from_value, Map};
+use error::*;
 
-pub fn exists(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
-  match last_key {
-    Some(key) => match a {
-      serde_json::Value::Bool(a_bool) => match b {
-        serde_json::Value::Object(b_obj) => match a_bool {
-          true => Ok(b_obj.contains_key(key)),
-          false => Ok(!b_obj.contains_key(key)),
-        },
-        _ => Err("Can only check for field existance on Object".to_string()),
-      },
-      _ => Err("Operation $exists requires Bool parameter. { 'key': { '$exists': true } }".to_string()),
-    },
-    None => Err("Operation $exists requires a preceding key. { 'key': { '$exists': true } }".to_string()),
-  } 
+pub fn exists(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+
+    let a_string: String = from_value(a)?;
+    let b_obj: Map<String, Value> = from_value(b)?;
+    Ok(b_obj.contains_key(match genealogy.last() {
+      Some(val) => val,
+    }))
 }
 
-pub fn type_op(a: &serde_json::Value, b: &serde_json::Value, _last_key: Option<&str>) -> Result<bool, String> {
+pub fn type_op(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   match a {
-    serde_json::Value::String(a_str) => match a_str.as_str() {
-      "double" => match b {
-        serde_json::Value::Number(_b_num) => Ok(true),
-        _ => Ok(false),
-      },
-      "string" => match b {
-        serde_json::Value::String(_b_str) => Ok(true),
-        _ => Ok(false),
-      },
-      "object" => match b {
-        serde_json::Value::Object(_b_obj) => Ok(true),
-        _ => Ok(false),
-      },
-      "array" => match b {
-        serde_json::Value::Array(_b_arr) => Ok(true),
-        _ => Ok(false),
-      },
-      "binData" => unimplemented!(),
-      "undefined" => unimplemented!("'undefined' type deprecated"),
-      "objectId" => unimplemented!(),
-      "bool" => match b {
-        serde_json::Value::Bool(_b_bool) => Ok(true),
-        _ => Ok(false),
-      },
-      "date" => unimplemented!(),
-      "null" => match b {
-        serde_json::Value::Null => Ok(true),
-        _ => Ok(false),
-      },
-      "regex" => unimplemented!(),
-      "dbPointer" => unimplemented!("'dbPointer' type deprecated"),
-      "javascript" => unimplemented!(),
-      "symbol" => unimplemented!("'symbol' type deprecated"),
-      "javascriptWithScope" => unimplemented!(),
-      "int" => unimplemented!(),
-      "timestamp" => unimplemented!(),
-      "long" => match b {
-        serde_json::Value::Number(b_num) => Ok(b_num.is_i64()),
-        _ => Ok(false),
-      },
-      "decimal" => unimplemented!(),
-      "minKey" => unimplemented!(),
-      "maxKey" => unimplemented!(),
-      "number" => match b {
-        serde_json::Value::Number(_b_num) => Ok(true),
-        _ => Ok(false),
-      },
-      _ => Err("Unknown type string".to_string()),
-    },
-    serde_json::Value::Number(a_num) => match a_num.as_i64() {
-      Some(a_int) => match a_int {
-        1 => match b {
-          serde_json::Value::Number(_b_num) => Ok(true),
-          _ => Ok(false),
-        },
-        2 => match b {
-          serde_json::Value::String(_b_str) => Ok(true),
-          _ => Ok(false),
-        },
-        3 => match b {
-          serde_json::Value::Object(_b_obj) => Ok(true),
-          _ => Ok(false),
-        },
-        4 => match b {
-          serde_json::Value::Array(_b_arr) => Ok(true),
-          _ => Ok(false),
-        },
+    Value::String(a_str) => {
+      let a_string: String = from_value(a)?;
+      Ok(match a_string.as_str() {
+        "double" => b.is_f64(),
+        "string" => b.is_string(),
+        "object" => b.is_object(),
+        "array" => b.is_array(),
+        "binData" => unimplemented!(),
+        "undefined" => unimplemented!("'undefined' type deprecated"),
+        "objectId" => unimplemented!(),
+        "bool" => b.is_boolean(),
+        "date" => unimplemented!(),
+        "null" => b.is_null(),
+        "regex" => unimplemented!(),
+        "dbPointer" => unimplemented!("'dbPointer' type deprecated"),
+        "javascript" => unimplemented!(),
+        "symbol" => unimplemented!("'symbol' type deprecated"),
+        "javascriptWithScope" => unimplemented!(),
+        "int" => unimplemented!(),
+        "timestamp" => unimplemented!(),
+        "long" => b.is_i64(),
+        "decimal" => unimplemented!(),
+        "minKey" => unimplemented!(),
+        "maxKey" => unimplemented!(),
+        "number" => b.is_number(),
+      })
+    }
+    Value::Number(a_num) => {
+      let a_i64: i64 = from_value(a)?;
+      Ok(match a_i64 {
+        1 => b.is_f64(),
+        2 => b.is_string(),
+        3 => b.is_object(),
+        4 => b.is_array(),
         5 => unimplemented!(),
         6 => unimplemented!("'undefined' type deprecated"),
         7 => unimplemented!(),
-        8 => match b {
-          serde_json::Value::Bool(_b_bool) => Ok(true),
-          _ => Ok(false),
-        },
+        8 => b.is_boolean(),
         9 => unimplemented!(),
-        10 => match b {
-          serde_json::Value::Null => Ok(true),
-          _ => Ok(false),
-        },
+        10 => b.is_null(),
         11 => unimplemented!(),
         12 => unimplemented!("'dbPointer' type deprecated"),
         13 => unimplemented!(),
@@ -104,17 +59,11 @@ pub fn type_op(a: &serde_json::Value, b: &serde_json::Value, _last_key: Option<&
         15 => unimplemented!(),
         16 => unimplemented!(),
         17 => unimplemented!(),
-        18 => match b {
-          serde_json::Value::Number(b_num) => Ok(b_num.is_i64()),
-          _ => Ok(false),
-        },
+        18 => b.is_number(),
         19 => unimplemented!(),
         -1 => unimplemented!(),
         127 => unimplemented!(),
-        _ => Err("Unknown type integer".to_string()),
-      },
-      None => Err("Must use an Integer type".to_string()),
-    },
-    _ => Err("Operation $type requires String or Integer parameter. { 'key': { '$type': 'string' } } or { 'key': { '$type': 2 } }".to_string()),
+      })
+    }
   }
 }

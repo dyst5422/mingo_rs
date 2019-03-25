@@ -1,49 +1,50 @@
-use serde_json;
+use serde_json::{Value};
+use error::*;
 
-pub fn geo_intersects(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
+pub fn geo_intersects(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn geo_within(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
+pub fn geo_within(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn near(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
+pub fn near(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn near_sphere(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
+pub fn near_sphere(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn box_op(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
+pub fn box_op(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn center(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
+pub fn center(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn center_sphere(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
+pub fn center_sphere(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn geometry(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
+pub fn geometry(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn max_distance(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
+pub fn max_distance(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn min_distance(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
+pub fn min_distance(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn polygon(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
+pub fn polygon(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn unique_docs(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
+pub fn unique_docs(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
   unimplemented!()
 }

@@ -1,31 +1,22 @@
-use serde_json;
-use internal;
-use util;
+use serde_json::{Value, from_value};
+use internal::query;
+use error::*;
 
-pub fn and(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
-  let a_array = util::value_to_array(a)?;
-  Ok(a_array.into_iter().all(|x| match internal::query(&x, b, last_key) {
-    Ok(val) => val,
-    Err(_msg) => false,
-  }))
+pub fn and(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+  let a_vec: Vec<Value> = from_value(a)?;
+  Ok(a_vec.iter().all(|&x| query(x, b, genealogy)))
 }
 
-pub fn not(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
-  Ok(!internal::query(a, b, last_key)?)
+pub fn not(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+  Ok(!query(a, b, genealogy))
 }
 
-pub fn or(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
-  let a_array = util::value_to_array(a)?;
-  Ok(a_array.into_iter().any(|x| match internal::query(&x, b, last_key) {
-    Ok(val) => val,
-    Err(_msg) => false,
-  }))
+pub fn or(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+  let a_vec: Vec<Value> = from_value(a)?;
+  Ok(a_vec.iter().any(|&x| query(x, b, genealogy)))
 }
 
-pub fn nor(a: &serde_json::Value, b: &serde_json::Value, last_key: Option<&str>) -> Result<bool, String> {
-  let a_array = util::value_to_array(a)?;
-  Ok(!a_array.into_iter().any(|x| match internal::query(&x, b, last_key) {
-    Ok(val) => val,
-    Err(_msg) => false,
-  }))
+pub fn nor(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+  let a_vec: Vec<Value> = from_value(a)?;
+  Ok(a_vec.iter().any(|&x| !query(x, b, genealogy)))
 }
