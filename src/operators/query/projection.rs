@@ -1,18 +1,18 @@
 use serde_json::{Value};
 use error::*;
 
-pub fn projection(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+pub fn projection(_a: &Value, _b: &Value, _genealogy: &Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn elem_match(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+pub fn elem_match(_a: &Value, _b: &Value, _genealogy: &Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn meta(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+pub fn meta(_a: &Value, _b: &Value, _genealogy: &Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn slice(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+pub fn slice(_a: &Value, _b: &Value, _genealogy: &Vec<String>) -> Result<bool> {
   unimplemented!()
 }

@@ -1,50 +1,50 @@
 use serde_json::{Value};
 use error::*;
 
-pub fn geo_intersects(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+pub fn geo_intersects(_a: &Value, _b: &Value, _genealogy: &Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn geo_within(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+pub fn geo_within(_a: &Value, _b: &Value, _genealogy: &Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn near(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+pub fn near(_a: &Value, _b: &Value, _genealogy: &Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn near_sphere(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+pub fn near_sphere(_a: &Value, _b: &Value, _genealogy: &Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn box_op(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+pub fn box_op(_a: &Value, _b: &Value, _genealogy: &Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn center(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+pub fn center(_a: &Value, _b: &Value, _genealogy: &Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn center_sphere(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+pub fn center_sphere(_a: &Value, _b: &Value, _genealogy: &Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn geometry(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+pub fn geometry(_a: &Value, _b: &Value, _genealogy: &Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn max_distance(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+pub fn max_distance(_a: &Value, _b: &Value, _genealogy: &Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn min_distance(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+pub fn min_distance(_a: &Value, _b: &Value, _genealogy: &Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn polygon(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+pub fn polygon(_a: &Value, _b: &Value, _genealogy: &Vec<String>) -> Result<bool> {
   unimplemented!()
 }
 
-pub fn unique_docs(a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+pub fn unique_docs(_a: &Value, _b: &Value, _genealogy: &Vec<String>) -> Result<bool> {
   unimplemented!()
 }

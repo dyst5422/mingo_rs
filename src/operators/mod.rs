@@ -1,10 +1,10 @@
 use serde_json::Value;
 use error::*;
-use internal::{aggregate};
+use external::{aggregate};
 pub mod query;
 pub mod aggregation;
 
-pub fn evaluate_query(operation: &str, a: Value, b: Value, genealogy: Vec<String>) -> Result<bool> {
+pub fn evaluate_query(operation: &str, a: &Value, b: &Value, genealogy: &Vec<String>) -> Result<bool> {
   match operation {
     // Comparison
     "eq" => query::comparison::eq(a, b, genealogy),
@@ -21,7 +21,11 @@ pub fn evaluate_query(operation: &str, a: Value, b: Value, genealogy: Vec<String
     "nor" => query::logical::nor(a, b, genealogy),
     "or" => query::logical::or(a, b, genealogy),
     // Element
-    "exists" => query::element::exists(a, b, genealogy),
+    "exists" => Err(MingoError::UnimplementedOperationError {
+      genealogy: genealogy.join(","),
+      message: "$lte: only usable on numbers or strings",
+      operation: operation.to_owned(),
+    }.into()),
     "type" => query::element::type_op(a, b, genealogy),
     // Evaluation
     "expr" => query::evaluation::expr(a, b, genealogy),
@@ -57,40 +61,51 @@ pub fn evaluate_query(operation: &str, a: Value, b: Value, genealogy: Vec<String
     "meta" => query::projection::meta(a, b, genealogy),
     "slice" => query::projection::slice(a, b, genealogy),
     "" => query::projection::projection(a, b, genealogy),
+
+
+    _ => Err(MingoError::UnknownQueryOperationError {
+      genealogy: genealogy.join(","),
+      operation: operation.to_owned(),
+    }.into()),
   }
 }
 
-pub fn evaluate_aggregation(operation: &str, a: Value, context: Value, genealogy: Vec<String>) -> Result<Value> {  
-  let a_aggregate = aggregate(a, genealogy)?;
-  
+pub fn evaluate_aggregation(operation: &str, a: &Value, context: &Value, genealogy: &Vec<String>) -> Result<Value> {
+  let a_aggregate = &aggregate(a, context, genealogy)?;
+
   match operation {
     // Arithmetic
-    "abs" => aggregation::arithmetic::abs(a_aggregate, genealogy),
-    "add" => aggregation::arithmetic::add(a_aggregate, genealogy),
-    "ceil" => aggregation::arithmetic::ceil(a_aggregate, genealogy),
-    "divide" => aggregation::arithmetic::divide(a_aggregate, genealogy),
-    "exp" => aggregation::arithmetic::exp(a_aggregate, genealogy),
-    "floor" => aggregation::arithmetic::floor(a_aggregate, genealogy),
-    "ln" => aggregation::arithmetic::ln(a_aggregate, genealogy),
-    "log" => aggregation::arithmetic::log(a_aggregate, genealogy),
-    "log10" => aggregation::arithmetic::log10(a_aggregate, genealogy),
-    "mod" => aggregation::arithmetic::mod_op(a_aggregate, genealogy),
-    "multiply" => aggregation::arithmetic::multiply(a_aggregate, genealogy),
-    "pow" => aggregation::arithmetic::pow(a_aggregate, genealogy),
-    "sqrt" => aggregation::arithmetic::sqrt(a_aggregate, genealogy),
-    "subtract" => aggregation::arithmetic::subtract(a_aggregate, genealogy),
-    "trunc" => aggregation::arithmetic::trunc(a_aggregate, genealogy),
-    // // Array
-    // "arrayElemAt" => aggregation::array::array_elem_at(a_aggregate),
-    // "arrayToObject" => aggregation::array::array_to_object(a_aggregate),
-    // "concatArrays" => aggregation::array::concat_arrays(a_aggregate),
-    // "filter" => aggregation::array::filter(a_aggregate),
-    // "in" => aggregation::array::in_op(a_aggregate),
-    // "indexOfArray" => aggregation::array::index_of_array(a_aggregate),
-    // "isArray" => aggregation::array::is_array(a_aggregate),
-    // "map" => aggregation::array::map(a_aggregate),
-    // "objectToArray" => aggregation::array::object_to_array(a_aggregate),
-    // "range" => aggregation::array::range(a_aggregate),
-    // _ => Err("Unknown aggregation operation"),
+    "abs" => aggregation::arithmetic::abs(a_aggregate, context, genealogy),
+    "add" => aggregation::arithmetic::add(a_aggregate, context, genealogy),
+    "ceil" => aggregation::arithmetic::ceil(a_aggregate, context, genealogy),
+    "divide" => aggregation::arithmetic::divide(a_aggregate, context, genealogy),
+    "exp" => aggregation::arithmetic::exp(a_aggregate, context, genealogy),
+    "floor" => aggregation::arithmetic::floor(a_aggregate, context, genealogy),
+    "ln" => aggregation::arithmetic::ln(a_aggregate, context, genealogy),
+    "log" => aggregation::arithmetic::log(a_aggregate, context, genealogy),
+    "log10" => aggregation::arithmetic::log10(a_aggregate, context, genealogy),
+    "mod" => aggregation::arithmetic::mod_op(a_aggregate, context, genealogy),
+    "multiply" => aggregation::arithmetic::multiply(a_aggregate, context, genealogy),
+    "pow" => aggregation::arithmetic::pow(a_aggregate, context, genealogy),
+    "sqrt" => aggregation::arithmetic::sqrt(a_aggregate, context, genealogy),
+    "subtract" => aggregation::arithmetic::subtract(a_aggregate, context, genealogy),
+    "trunc" => aggregation::arithmetic::trunc(a_aggregate, context, genealogy),
+    // Array
+    "arrayElemAt" => aggregation::array::array_elem_at(a_aggregate, context, genealogy),
+    "arrayToObject" => aggregation::array::array_to_object(a_aggregate, context, genealogy),
+    "concatArrays" => aggregation::array::concat_arrays(a_aggregate, context, genealogy),
+    "filter" => aggregation::array::filter(a_aggregate, context, genealogy),
+    "in" => aggregation::array::in_op(a_aggregate, context, genealogy),
+    "indexOfArray" => aggregation::array::index_of_array(a_aggregate, context, genealogy),
+    "isArray" => aggregation::array::is_array(a_aggregate, context, genealogy),
+    "map" => aggregation::array::map(a_aggregate, context, genealogy),
+    "objectToArray" => aggregation::array::object_to_array(a_aggregate, context, genealogy),
+    "range" => aggregation::array::range(a_aggregate, context, genealogy),
+
+
+    _ => Err(MingoError::UnknownAggregationOperationError {
+      genealogy: genealogy.join(","),
+      operation: operation.to_owned(),
+    }.into()),
   }
 }
