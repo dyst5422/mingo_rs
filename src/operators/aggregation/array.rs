@@ -1,7 +1,7 @@
 use error::*;
 use external::aggregate;
 use serde_derive::{Deserialize, Serialize};
-use serde_json::{Error, Map, Value};
+use serde_json::{Map, Value};
 use utils::from_value;
 use failure;
 
@@ -52,40 +52,40 @@ pub fn concat_arrays(a: &Value, _context: &Value, _genealogy: &Vec<String>) -> R
   Ok(merged_vec.into())
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-enum AsEnum {
-  As(String),
-  None,
-}
-
-impl Into<String> for AsEnum {
-  fn into(self) -> String {
-    match self {
-      AsEnum::As(as_key) => as_key,
-      AsEnum::None => "this".to_string(),
-    }
-  }
-}
-
 pub fn filter(a: &Value, _context: &Value, genealogy: &Vec<String>) -> Result<Value> {
   #[derive(Serialize, Deserialize)]
   struct FilterDefinition {
     input: Vec<Value>,
     cond: Value,
-    r#as: AsEnum,
+    r#as: Option<String>,
   }
-  let a_filter: FilterDefinition = from_value(a)?;
+  let FilterDefinition { input: filter_input, cond: filter_cond, r#as: filter_as_option } = from_value(a)?;
+  let filter_as = match filter_as_option {
+    Some(this_key) => this_key,
+    None => "this".to_string(),
+  };
 
-  a_filter
-    .input
+  let filtered_iterator = filter_input
     .iter()
     .filter_map(|x| {
-      let as_key: String = a_filter.r#as.clone().into();
       let mut context = Map::new();
-      context.insert(as_key, x.clone());
-      aggregate(&a_filter.cond, &context.into(), genealogy).into()
-    })
-    .collect()
+      context.insert(filter_as.clone(), x.clone());
+
+      let cond_result = aggregate(&filter_cond, &context.into(), genealogy);
+      match cond_result {
+        Ok(val) => match val.as_bool() {
+          Some(val_bool) => match val_bool {
+            true => Some(x.clone()),
+            false => None,
+          },
+          None => None
+        },
+        Err(_) => None
+      }
+    });
+
+    let filtered_collection: Vec<Value> = filtered_iterator.collect();
+    Ok(filtered_collection.into())
 }
 
 pub fn in_op(a: &Value, _context: &Value, _genealogy: &Vec<String>) -> Result<Value> {
@@ -93,14 +93,9 @@ pub fn in_op(a: &Value, _context: &Value, _genealogy: &Vec<String>) -> Result<Va
   Ok(b_vec.contains(&a_val).into())
 }
 
-pub fn index_of_array(a: &Value, _context: &Value, _genealogy: &Vec<String>) -> Result<Value> {
-  #[derive(Serialize, Deserialize)]
-  enum IndexOfArrayInputs {
-    Two((Vec<Value>, Value)),
-    Three((Vec<Value>, Value, usize)),
-    Four((Vec<Value>, Value, usize, usize)),
-  }
-  #[derive(Serialize, Deserialize)]
+pub fn index_of_array(a: &Value, _context: &Value, genealogy: &Vec<String>) -> Result<Value> {
+
+  #[derive(Serialize, Deserialize, Debug)]
   struct IndexOfArrayDefinition {
     vector: Vec<Value>,
     value: Value,
@@ -108,32 +103,41 @@ pub fn index_of_array(a: &Value, _context: &Value, _genealogy: &Vec<String>) -> 
     end_index: usize,
   }
 
-  impl Into<IndexOfArrayDefinition> for IndexOfArrayInputs {
-    fn into(self) -> IndexOfArrayDefinition {
-      match self {
-        IndexOfArrayInputs::Two((vec, val)) => IndexOfArrayDefinition {
-          end_index: vec.len(),
-          vector: vec,
-          value: val,
-          start_index: 0,
-        },
-        IndexOfArrayInputs::Three((vec, val, start_index)) => IndexOfArrayDefinition {
-          end_index: vec.len(),
-          vector: vec,
-          value: val,
-          start_index: start_index,
-        },
-        IndexOfArrayInputs::Four((vec, val, start_index, end_index)) => IndexOfArrayDefinition {
-          vector: vec,
-          value: val,
-          start_index: start_index,
-          end_index: end_index,
-        },
-      }
-    }
-  }
+  let index_of_array_inputs: Vec<Value> = from_value(a)?;
 
-  let index_of_array_def: IndexOfArrayDefinition = from_value(a)?;
+  let index_of_array_def = match index_of_array_inputs.len() {
+    2 => {
+      let vector: Vec<Value> = from_value(&index_of_array_inputs[0])?;
+      Ok(IndexOfArrayDefinition {
+        end_index: vector.len(),
+        vector,
+        value: index_of_array_inputs[1].clone(),
+        start_index: 0,
+      })
+    },
+    3 => {
+      let vector: Vec<Value> = from_value(&index_of_array_inputs[0])?;
+      let start_index: usize = from_value(&index_of_array_inputs[2])?;
+      Ok(IndexOfArrayDefinition {
+        end_index: vector.len(),
+        vector,
+        value: index_of_array_inputs[1].clone(),
+        start_index,
+      })
+    },
+    4 => {
+      let vector: Vec<Value> = from_value(&index_of_array_inputs[0])?;
+      let start_index: usize = from_value(&index_of_array_inputs[2])?;
+      let end_index: usize = from_value(&index_of_array_inputs[3])?;
+      Ok(IndexOfArrayDefinition {
+        end_index,
+        vector,
+        value: index_of_array_inputs[1].clone(),
+        start_index,
+      })
+    },
+    _ => Err(MingoError::ImproperlyFormattedAggregationError { genealogy: genealogy.join(","), message: ""})
+  }?;
 
   Ok(
     match index_of_array_def.vector[index_of_array_def.start_index..index_of_array_def.end_index]
@@ -158,19 +162,21 @@ pub fn map(a: &Value, _context: &Value, genealogy: &Vec<String>) -> Result<Value
   struct MapDefinition {
     input: Vec<Value>,
     r#in: Value,
-    r#as: AsEnum,
+    r#as: Option<String>,
   }
 
-  let a_map: MapDefinition = from_value(a)?;
+  let MapDefinition { input: map_input, r#in: map_in, r#as: map_as_option } = from_value(a)?;
+  let map_as = match map_as_option {
+    Some(this_key) => this_key,
+    None => "this".to_string(),
+  };
 
-  a_map
-    .input
+  map_input
     .iter()
     .map(|x| {
-      let as_key: String = a_map.r#as.clone().into();
       let mut context = Map::new();
-      context.insert(as_key, x.clone());
-      aggregate(&a_map.r#in, &context.into(), genealogy)
+      context.insert(map_as.clone(), x.clone());
+      aggregate(&map_in, &context.into(), genealogy)
     })
     .collect()
 }

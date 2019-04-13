@@ -37,6 +37,11 @@ pub enum MingoError {
   ImproperlyFormattedQueryError {
     message: &'static str,
     genealogy: String,
+  },
+  #[fail(display = "Improperly formatted aggregation at {}\n{}", genealogy, message)]
+  ImproperlyFormattedAggregationError {
+    message: &'static str,
+    genealogy: String,
   }
 }
 
